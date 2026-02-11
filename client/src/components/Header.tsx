@@ -1,3 +1,4 @@
+import { AlertCircle } from "lucide-react";
 import {
   File,
   Edit2,
@@ -63,17 +64,6 @@ import { useToast } from "@/hooks/use-toast";
 import { generateSystemDiagramSVG } from "@/lib/diagram-generator";
 import folderIcon from "@assets/open-folder_1770356038145.png";
 
-import { FileNameDialog } from "@/components/FileNameDialog";
-
-interface HeaderProps {
-  onExport: (fileName?: string) => void;
-  onGenerateOut: (fileName?: string) => void;
-  isGeneratingOut: boolean;
-  onSave: () => void;
-  onLoad: () => void;
-  onShowDiagram?: () => void;
-}
-
 export function Header({
   onExport,
   onGenerateOut,
@@ -83,8 +73,6 @@ export function Header({
   onShowDiagram,
 }: HeaderProps) {
   const { toast } = useToast();
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [isOutDialogOpen, setIsOutDialogOpen] = useState(false);
   const {
     addNode,
     clearNetwork,
@@ -97,6 +85,8 @@ export function Header({
     removeOutputRequest,
     projectName,
     setProjectName,
+    projectNameError,
+    setProjectNameError,
     undo,
     redo,
     history,
@@ -172,8 +162,30 @@ export function Header({
     }
   };
 
-  const handleOutConfirm = (fileName: string) => {
-    handleGenerateOutDirectly(fileName);
+  const handleExport = () => {
+    if (!projectName.trim()) {
+      setProjectNameError("Please enter a file name");
+      toast({
+        title: "Validation Error",
+        description: "Please enter a project name before downloading.",
+        variant: "destructive",
+      });
+      return;
+    }
+    onExport(projectName);
+  };
+
+  const handleOutGenerate = () => {
+    if (!projectName.trim()) {
+      setProjectNameError("Please enter a file name");
+      toast({
+        title: "Validation Error",
+        description: "Please enter a project name before generating .OUT.",
+        variant: "destructive",
+      });
+      return;
+    }
+    handleGenerateOutDirectly(projectName);
   };
 
   return (
@@ -188,16 +200,17 @@ export function Header({
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5 h-7">
             <input
-              className="text-lg font-normal leading-tight text-black bg-transparent border-none focus:ring-1 focus:ring-[#1a73e8] px-1 -ml-1 rounded cursor-text outline-none hover:bg-[#f1f3f4]"
+              className={`text-lg font-normal leading-tight text-black bg-transparent border focus:ring-1 focus:ring-[#1a73e8] px-1 -ml-1 rounded cursor-text outline-none hover:bg-[#f1f3f4] ${projectNameError ? 'border-destructive ring-1 ring-destructive' : 'border-transparent'}`}
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              onBlur={() =>
-                toast({
-                  title: "Project Renamed",
-                  description: `Project name changed to ${projectName}`,
-                })
-              }
+              placeholder="Enter project name..."
             />
+            {projectNameError && (
+              <div className="flex items-center gap-1 text-xs text-yellow-600 font-medium ml-2">
+                <AlertCircle className="w-3 h-3 text-destructive" />
+                {projectNameError}
+              </div>
+            )}
           </div>
           <Menubar className="border-none bg-transparent shadow-none h-auto p-0 min-h-0">
             <MenubarMenu>
@@ -231,7 +244,7 @@ export function Header({
                 >
                   <Share2 className="w-4 h-4" /> Share
                 </MenubarItem>
-                <MenubarItem onClick={() => setIsExportDialogOpen(true)} className="gap-2">
+                <MenubarItem onClick={handleExport} className="gap-2">
                   <DownloadCloud className="w-4 h-4" /> Download (.inp)
                 </MenubarItem>
                 <MenubarSeparator />
@@ -651,7 +664,7 @@ export function Header({
           <Button
             variant="default"
             size="sm"
-            onClick={() => setIsExportDialogOpen(true)}
+            onClick={handleExport}
             className="h-9 px-6 rounded-full bg-[#1a73e8] hover:bg-[#1557b0] text-white font-medium shadow-sm transition-all"
             data-testid="button-generate-inp"
           >
@@ -662,7 +675,7 @@ export function Header({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsOutDialogOpen(true)}
+            onClick={handleOutGenerate}
             disabled={isGeneratingOut}
             className="h-9 px-6 rounded-full border-[#1a73e8] text-[#1a73e8] hover:bg-[#1a73e8]/10 font-medium shadow-sm transition-all"
             data-testid="button-generate-out"
@@ -672,20 +685,6 @@ export function Header({
           </Button>
         </div>
       </div>
-      <FileNameDialog
-        isOpen={isExportDialogOpen}
-        onClose={() => setIsExportDialogOpen(false)}
-        onConfirm={onExport}
-        title="Download .INP File"
-        defaultFileName={projectName}
-      />
-      <FileNameDialog
-        isOpen={isOutDialogOpen}
-        onClose={() => setIsOutDialogOpen(false)}
-        onConfirm={handleOutConfirm}
-        title="Generate .OUT File"
-        defaultFileName={projectName}
-      />
     </div>
   );
 }

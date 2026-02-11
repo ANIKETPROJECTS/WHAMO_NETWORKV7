@@ -38,8 +38,6 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { FileNameDialog } from "./FileNameDialog";
-
 export function Toolbar({ onExport, onSave, onLoad }: { onExport: (fileName?: string) => void, onSave: () => void, onLoad: () => void }) {
   const { 
     addNode, 
@@ -52,13 +50,8 @@ export function Toolbar({ onExport, onSave, onLoad }: { onExport: (fileName?: st
     addOutputRequest,
     removeOutputRequest,
     projectName,
+    setProjectNameError,
   } = useNetworkStore();
-
-  const [localParams, setLocalParams] = useState(computationalParams);
-  const [selectedElementId, setSelectedElementId] = useState<string>("");
-  const [selectedVars, setSelectedVars] = useState<string[]>([]);
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [isOutDialogOpen, setIsOutDialogOpen] = useState(false);
 
   const handleAddRequest = () => {
     if (!selectedElementId || selectedVars.length === 0) return;
@@ -114,6 +107,22 @@ export function Toolbar({ onExport, onSave, onLoad }: { onExport: (fileName?: st
       console.error("WHAMO Error:", error);
       alert(error.message);
     }
+  };
+
+  const handleExport = () => {
+    if (!projectName.trim()) {
+      setProjectNameError("Please enter a file name");
+      return;
+    }
+    onExport(projectName);
+  };
+
+  const handleOutGenerate = () => {
+    if (!projectName.trim()) {
+      setProjectNameError("Please enter a file name");
+      return;
+    }
+    handleRunWhamo(projectName);
   };
 
   return (
@@ -325,13 +334,13 @@ export function Toolbar({ onExport, onSave, onLoad }: { onExport: (fileName?: st
             <TooltipContent>Save Project State</TooltipContent>
           </Tooltip>
 
-          <Button onClick={() => setIsExportDialogOpen(true)} className="ml-2 shadow-lg shadow-primary/20" data-testid="button-generate-inp">
+          <Button onClick={handleExport} className="ml-2 shadow-lg shadow-primary/20" data-testid="button-generate-inp">
             <Download className="w-4 h-4 mr-2" />
             Generate .INP
           </Button>
 
           <Button 
-            onClick={() => setIsOutDialogOpen(true)} 
+            onClick={handleOutGenerate} 
             variant="outline" 
             className="ml-2 border-primary text-primary hover:bg-primary/10"
             data-testid="button-generate-out"
@@ -341,20 +350,6 @@ export function Toolbar({ onExport, onSave, onLoad }: { onExport: (fileName?: st
           </Button>
         </div>
       </div>
-      <FileNameDialog
-        isOpen={isExportDialogOpen}
-        onClose={() => setIsExportDialogOpen(false)}
-        onConfirm={onExport}
-        title="Download .INP File"
-        defaultFileName={projectName}
-      />
-      <FileNameDialog
-        isOpen={isOutDialogOpen}
-        onClose={() => setIsOutDialogOpen(false)}
-        onConfirm={handleRunWhamo}
-        title="Generate .OUT File"
-        defaultFileName={projectName}
-      />
     </div>
   );
 }

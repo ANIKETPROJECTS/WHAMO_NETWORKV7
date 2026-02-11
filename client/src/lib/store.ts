@@ -75,6 +75,7 @@ interface NetworkState {
   outputRequests: OutputRequest[];
   isLocked: boolean;
   projectName: string;
+  projectNameError: string | null;
   history: {
     past: Partial<NetworkState>[];
     future: Partial<NetworkState>[];
@@ -96,6 +97,7 @@ interface NetworkState {
   removeOutputRequest: (id: string) => void;
   toggleLock: () => void;
   setProjectName: (name: string) => void;
+  setProjectNameError: (error: string | null) => void;
   undo: () => void;
   redo: () => void;
   saveToHistory: () => void;
@@ -117,6 +119,7 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   outputRequests: [],
   isLocked: false,
   projectName: "Untitled Network",
+  projectNameError: null,
   history: {
     past: [],
     future: [],
@@ -348,7 +351,11 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   },
 
   setProjectName: (name: string) => {
-    set({ projectName: name });
+    set({ projectName: name, projectNameError: name.trim() === "" ? "Please enter a file name" : null });
+  },
+
+  setProjectNameError: (error: string | null) => {
+    set({ projectNameError: error });
   },
 
   saveToHistory: () => {
