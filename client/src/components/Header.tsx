@@ -1,5 +1,7 @@
-import { AlertCircle } from "lucide-react";
 import {
+  AlertCircle,
+  Maximize2,
+  Layout,
   File,
   Edit2,
   PlusCircle,
@@ -25,7 +27,6 @@ import {
   GitCommitHorizontal,
   ArrowRightCircle,
   ListVideo,
-  Layout,
   Info,
   ExternalLink,
 } from "lucide-react";
@@ -82,8 +83,15 @@ export function Header({
   onShowDiagram,
 }: HeaderProps) {
   const { toast } = useToast();
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
   const {
     addNode,
     clearNetwork,
@@ -345,8 +353,34 @@ export function Header({
                 View
               </MenubarTrigger>
               <MenubarContent>
-                <MenubarItem>Full Screen</MenubarItem>
-                <MenubarItem>Show Grid</MenubarItem>
+                <MenubarItem 
+                  onClick={() => {
+                    if (!document.fullscreenElement) {
+                      document.documentElement.requestFullscreen().catch(err => {
+                        toast({
+                          title: "Error",
+                          description: `Error attempting to enable full-screen mode: ${err.message}`,
+                          variant: "destructive",
+                        });
+                      });
+                    } else {
+                      document.exitFullscreen();
+                    }
+                  }}
+                  className="gap-2"
+                >
+                  <Maximize2 className="w-4 h-4" /> {isFullscreen ? "Exit Full Screen" : "Full Screen"}
+                  <MenubarShortcut>F11</MenubarShortcut>
+                </MenubarItem>
+                <MenubarItem 
+                  onClick={() => {
+                    const event = new CustomEvent('toggle-grid');
+                    window.dispatchEvent(event);
+                  }}
+                  className="gap-2"
+                >
+                  <Layout className="w-4 h-4" /> Show Grid
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
 

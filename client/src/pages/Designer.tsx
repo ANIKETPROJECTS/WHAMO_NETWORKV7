@@ -112,6 +112,13 @@ function DesignerInner() {
         zoomOut();
       } else if (event.key.toLowerCase() === 'f') {
         fitView();
+      } else if (event.key === 'F11') {
+        event.preventDefault();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(console.error);
+        } else {
+          document.exitFullscreen().catch(console.error);
+        }
       } else if (event.key.toLowerCase() === 'z' && (event.metaKey || event.ctrlKey)) {
         if (event.shiftKey) {
           redo();
@@ -134,7 +141,7 @@ function DesignerInner() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deleteElement, selectedElementId, selectedElementType, zoomIn, zoomOut, fitView, toggleLock]);
+  }, [deleteElement, selectedElementId, selectedElementType, zoomIn, zoomOut, fitView, toggleLock, undo, redo, handleSave]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -351,6 +358,13 @@ function DesignerInner() {
   const [showLabels, setShowLabels] = useState(true);
   const [diagramSvg, setDiagramSvg] = useState<string | null>(null);
   const [showShortcutConsole, setShowShortcutConsole] = useState(false);
+  const [showGrid, setShowGrid] = useState(true);
+
+  useEffect(() => {
+    const handleToggleGrid = () => setShowGrid((prev) => !prev);
+    window.addEventListener('toggle-grid', handleToggleGrid);
+    return () => window.removeEventListener('toggle-grid', handleToggleGrid);
+  }, []);
 
   const handleNewProject = () => {
     clearNetwork();
@@ -553,7 +567,7 @@ function DesignerInner() {
                   nodesConnectable={!isLocked}
                   elementsSelectable={true}
                 >
-                  <Background color="#94a3b8" gap={20} size={1} />
+                  <Background color="#94a3b8" gap={20} size={1} className={cn(!showGrid && "opacity-0")} />
                   <Controls className="!bg-white !shadow-xl !border-border">
                   </Controls>
                 </ReactFlow>
