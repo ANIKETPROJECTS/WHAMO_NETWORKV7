@@ -278,17 +278,7 @@ function DesignerInner() {
   };
 
   const handleOpenProject = () => {
-    // Load mock project data
-    const mockNodes = [
-      { id: '1', type: 'reservoir', position: { x: 100, y: 150 }, data: { label: 'Res 1' } },
-      { id: '2', type: 'junction', position: { x: 400, y: 150 }, data: { label: 'Junc 1' } },
-    ];
-    const mockEdges = [
-      { id: 'e1-2', source: '1', target: '2', type: 'connection', data: { label: 'Pipe 1' } }
-    ];
-    loadNetwork(mockNodes as any, mockEdges as any, undefined, undefined, "Sample Project");
-    setProjectState("active");
-    toast({ title: "Project Loaded", description: "Sample network topology loaded." });
+    handleLoadClick();
   };
 
   const [showDiagram, setShowDiagram] = useState(false);
