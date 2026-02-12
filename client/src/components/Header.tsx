@@ -257,9 +257,6 @@ export function Header({
                 >
                   <Share2 className="w-4 h-4" /> Share
                 </MenubarItem>
-                <MenubarItem onClick={handleExport} className="gap-2">
-                  <DownloadCloud className="w-4 h-4" /> Download (.inp)
-                </MenubarItem>
                 <MenubarSeparator />
                 <MenubarItem
                   onClick={() => {
